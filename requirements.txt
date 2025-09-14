@@ -16,10 +16,12 @@ google-pasta==0.2.0
 grpcio==1.74.0
 h5py==3.14.0
 idna==3.10
+imageio==2.37.0
 Jinja2==3.1.6
 jsonschema==4.25.1
 jsonschema-specifications==2025.9.1
 keras==3.11.3
+lazy_loader==0.4
 libclang==18.1.1
 Markdown==3.9
 markdown-it-py==4.0.0
@@ -28,6 +30,7 @@ mdurl==0.1.2
 ml_dtypes==0.5.3
 namex==0.1.0
 narwhals==2.5.0
+networkx==3.4.2
 numpy==2.2.6
 opt_einsum==3.4.0
 optree==0.17.0
@@ -44,6 +47,8 @@ referencing==0.36.2
 requests==2.32.5
 rich==14.1.0
 rpds-py==0.27.1
+scikit-image==0.25.2
+scipy==1.15.3
 six==1.17.0
 smmap==5.0.2
 streamlit==1.49.1
@@ -52,6 +57,7 @@ tensorboard==2.20.0
 tensorboard-data-server==0.7.2
 tensorflow==2.20.0
 termcolor==3.1.0
+tifffile==2025.5.10
 toml==0.10.2
 tornado==6.5.2
 typing_extensions==4.15.0
