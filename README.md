@@ -34,7 +34,7 @@
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/Mehtab23455/plantvision-ai.git
+git clone https://github.com/Mehtab23455/Plant-Disease-Prediction.git
 cd plantvision-ai
  
 
