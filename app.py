@@ -1,66 +1,61 @@
 import os
 import tensorflow as tf
 import numpy as np
-from tensorflow import keras
-from skimage import io
 from tensorflow.keras.preprocessing import image
-
-
-# Flask utils
-from flask import Flask, redirect, url_for, request, render_template
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input
+from flask import Flask, request, render_template
 from werkzeug.utils import secure_filename
-from gevent.pywsgi import WSGIServer
 
-# Define a flask app
+
+# Define Flask app
 app = Flask(__name__)
 
-# Model saved with Keras model.save()
+# --- Rebuild the DenseNet model in code ---
+from densenet_model import build_densenet  # Make sure your build_densenet() function is in model.py
 
-model =tf.keras.models.load_model('PlantDNet.h5',compile=False)
+# Initialize model architecture
+model = build_densenet(num_classes=15)
+
+# Load the weights only
+# model.load_weights("PlantDNet.h5")  # original trained weights
+model.summary()
 
 
 def model_predict(img_path, model):
-    img = image.load_img(img_path, grayscale=False, target_size=(64, 64))
-    show_img = image.load_img(img_path, grayscale=False, target_size=(64, 64))
+    img = image.load_img(img_path, target_size=(224,224))
     x = image.img_to_array(img)
     x = np.expand_dims(x, axis=0)
-    x = np.array(x, 'float32')
-    x /= 255
+    x = x / 255.0  # normalize
     preds = model.predict(x)
     return preds
 
 
 @app.route('/', methods=['GET'])
 def index():
-    # Main page
-    return render_template('index.html') #render home page
+    return render_template('index.html')
 
-@app.route('/predict', methods=['GET', 'POST'])
+
+@app.route('/predict', methods=['POST'])
 def upload():
-    if request.method == 'POST':
-        # Get the file from post request
-        f = request.files['file']
+    f = request.files['file']
 
-        # Save the file to ./uploads
-        basepath = os.path.dirname(__file__)
-        file_path = os.path.join(
-            basepath, 'uploads', secure_filename(f.filename))
-        f.save(file_path)
+    # Save uploaded file
+    basepath = os.path.dirname(__file__)
+    file_path = os.path.join(basepath, 'uploads', secure_filename(f.filename))
+    f.save(file_path)
 
-        # Make prediction
-        preds = model_predict(file_path, model)
-        print(preds[0])
+    # Predict
+    preds = model_predict(file_path, model)
+    disease_class = ['Pepper__bell___Bacterial_spot', 'Pepper__bell___healthy', 'Potato___Early_blight',
+                     'Potato___Late_blight', 'Potato___healthy', 'Tomato_Bacterial_spot', 'Tomato_Early_blight',
+                     'Tomato_Late_blight', 'Tomato_Leaf_Mold', 'Tomato_Septoria_leaf_spot',
+                     'Tomato_Spider_mites_Two_spotted_spider_mite', 'Tomato__Target_Spot',
+                     'Tomato__Tomato_YellowLeaf__Curl_Virus', 'Tomato__Tomato_mosaic_virus', 'Tomato_healthy']
 
-        disease_class = ['Pepper__bell___Bacterial_spot', 'Pepper__bell___healthy', 'Potato___Early_blight',
-                         'Potato___Late_blight', 'Potato___healthy', 'Tomato_Bacterial_spot', 'Tomato_Early_blight',
-                         'Tomato_Late_blight', 'Tomato_Leaf_Mold', 'Tomato_Septoria_leaf_spot',
-                         'Tomato_Spider_mites_Two_spotted_spider_mite', 'Tomato__Target_Spot',
-                         'Tomato__Tomato_YellowLeaf__Curl_Virus', 'Tomato__Tomato_mosaic_virus', 'Tomato_healthy']
-        a = preds[0]
-        ind=np.argmax(a)
-        result=disease_class[ind]
-        return result
-    return None
+    ind = np.argmax(preds[0])
+    result = disease_class[ind]
+    return result
 
 
 if __name__ == '__main__':
